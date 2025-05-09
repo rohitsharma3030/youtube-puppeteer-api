@@ -1,7 +1,6 @@
 {
   "name": "youtube-puppeteer-api",
   "version": "1.0.0",
-  "description": "Scrape YouTube video info using Puppeteer",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
