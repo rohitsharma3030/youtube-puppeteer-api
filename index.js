@@ -1,38 +1,32 @@
-const express = require('express');
-const puppeteer = require('puppeteer');
-
+const express = require("express");
+const puppeteer = require("puppeteer");
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
-
-app.post('/info', async (req, res) => {
-  const { url } = req.body;
-
-  if (!url) return res.status(400).json({ error: 'Missing YouTube URL' });
-
-  try {
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle2' });
-
-    // Example: scrape title
-    const title = await page.title();
-
-    await browser.close();
-    res.json({ title });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+app.get("/", (req, res) => {
+  res.send("🧠 YouTube Puppeteer API is running!");
 });
 
-app.get('/', (req, res) => {
-  res.send('Puppeteer is running!');
+app.get("/info", async (req, res) => {
+  const url = req.query.url;
+  if (!url) return res.status(400).json({ error: "URL is required" });
+
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: "networkidle2" });
+
+  const title = await page.title();
+  const thumbnail = await page.$eval("link[rel='shortcut icon']", el => el.href);
+
+  await browser.close();
+
+  res.json({ title, thumbnail });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
